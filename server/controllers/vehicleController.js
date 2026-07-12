@@ -136,3 +136,22 @@ export const getVehicleStats = async (_req, res) => {
 
   res.json(result);
 };
+
+// @desc    Upload vehicle document
+// @route   POST /api/vehicles/:id/document
+// @access  Private (Fleet Manager, Safety Officer)
+export const uploadVehicleDocument = async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: 'No file uploaded or invalid file type' });
+  }
+  
+  const vehicle = await Vehicle.findById(req.params.id);
+  if (!vehicle) {
+    return res.status(404).json({ error: 'Vehicle not found' });
+  }
+
+  vehicle.documentUrl = `/uploads/${req.file.filename}`;
+  await vehicle.save();
+  
+  res.json(vehicle);
+};

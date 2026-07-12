@@ -6,8 +6,10 @@ import {
   updateVehicle,
   deleteVehicle,
   getVehicleStats,
+  uploadVehicleDocument,
 } from '../controllers/vehicleController.js';
 import { protect, authorize } from '../middleware/authMiddleware.js';
+import { upload } from '../middleware/uploadMiddleware.js';
 
 const router = express.Router();
 
@@ -22,5 +24,7 @@ router.route('/:id')
   .get(getVehicle)
   .put(authorize('Fleet Manager', 'Safety Officer'), updateVehicle)
   .delete(authorize('Fleet Manager'), deleteVehicle);
+
+router.post('/:id/document', authorize('Fleet Manager', 'Safety Officer'), upload.single('document'), uploadVehicleDocument);
 
 export default router;

@@ -46,6 +46,10 @@ const vehicleSchema = new mongoose.Schema(
       enum: ['Available', 'On Trip', 'In Shop', 'Retired'],
       default: 'Available',
     },
+    documentUrl: {
+      type: String,
+      default: null,
+    },
   },
   { timestamps: true }
 );

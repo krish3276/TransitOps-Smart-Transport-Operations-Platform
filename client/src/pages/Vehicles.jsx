@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Search, Pencil, Trash2, X } from 'lucide-react';
+import { Plus, Search, Pencil, Trash2, X, FileText, Download } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../services/api.js';
 import '../styles/vehicles.css';
@@ -44,6 +44,7 @@ function VehicleModal({ vehicle, onClose, onSaved }) {
       : EMPTY_FORM
   );
   const [loading, setLoading] = useState(false);
+  const [documentFile, setDocumentFile] = useState(null);
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
@@ -51,13 +52,25 @@ function VehicleModal({ vehicle, onClose, onSaved }) {
     e.preventDefault();
     setLoading(true);
     try {
+      let vehicleId = vehicle?._id;
       if (vehicle) {
         await api.put(`/vehicles/${vehicle._id}`, form);
         toast.success('Vehicle updated');
       } else {
-        await api.post('/vehicles', form);
+        const res = await api.post('/vehicles', form);
+        vehicleId = res.data._id;
         toast.success('Vehicle added');
       }
+
+      if (documentFile && vehicleId) {
+        const formData = new FormData();
+        formData.append('document', documentFile);
+        await api.post(`/vehicles/${vehicleId}/document`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        toast.success('Document uploaded');
+      }
+
       onSaved();
       onClose();
     } catch (err) {
@@ -137,6 +150,24 @@ function VehicleModal({ vehicle, onClose, onSaved }) {
                 placeholder="e.g. 620000"
                 min={0}
               />
+            </div>
+          </div>
+          <div className="form-row">
+            <div className="form-group" style={{ width: '100%' }}>
+              <label>Vehicle Document (PDF, JPG, PNG - Max 5MB)</label>
+              <input 
+                type="file" 
+                accept=".pdf, image/jpeg, image/png, image/jpg" 
+                onChange={(e) => setDocumentFile(e.target.files[0])}
+                style={{ padding: '8px' }}
+              />
+              {vehicle?.documentUrl && !documentFile && (
+                <div style={{ marginTop: 8, fontSize: 13 }}>
+                  <a href={`http://localhost:5000${vehicle.documentUrl}`} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--blue)' }}>
+                    <Download size={14} /> Download Current Document
+                  </a>
+                </div>
+              )}
             </div>
           </div>
           <div className="modal-actions">
@@ -277,6 +308,7 @@ export default function Vehicles() {
               <th>CAPACITY</th>
               <th>ODOMETER</th>
               <th>ACQ. COST</th>
+              <th>DOC</th>
               <th>STATUS</th>
               <th></th>
             </tr>
@@ -299,6 +331,15 @@ export default function Vehicles() {
                 <td>{v.maxLoadCapacity.toLocaleString()} kg</td>
                 <td>{v.odometer.toLocaleString()}</td>
                 <td>₹{v.acquisitionCost.toLocaleString()}</td>
+                <td>
+                  {v.documentUrl ? (
+                    <a href={`http://localhost:5000${v.documentUrl}`} target="_blank" rel="noopener noreferrer" title="View Document" style={{ color: 'var(--text-muted)' }}>
+                      <FileText size={16} />
+                    </a>
+                  ) : (
+                    <span style={{ color: 'var(--border)' }}>-</span>
+                  )}
+                </td>
                 <td><StatusBadge status={v.status} /></td>
                 <td className="row-actions">
                   <button
