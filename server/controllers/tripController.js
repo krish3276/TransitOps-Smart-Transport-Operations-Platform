@@ -25,6 +25,10 @@ export const getTrips = async (req, res) => {
   if (search) {
     filter.tripId = { $regex: search, $options: 'i' };
   }
+  
+  if (req.user.role === 'Driver') {
+    filter.driver = req.user._id;
+  }
 
   const total = await Trip.countDocuments(filter);
   const trips = await Trip.find(filter)

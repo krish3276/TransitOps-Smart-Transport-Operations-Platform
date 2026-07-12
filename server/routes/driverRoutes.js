@@ -7,6 +7,7 @@ import {
   deleteDriver,
   toggleStatus,
   getDriverStats,
+  checkExpiringLicensesManually,
 } from '../controllers/driverController.js';
 import { protect, authorize } from '../middleware/authMiddleware.js';
 
@@ -15,6 +16,7 @@ router.use(protect); // all driver routes require auth
 
 // Stats — must be before /:id to avoid "stats" being treated as an id
 router.get('/stats', getDriverStats);
+router.post('/check-expiring-licenses', authorize('Fleet Manager', 'Safety Officer'), checkExpiringLicensesManually);
 
 router.route('/')
   .get(getDrivers)

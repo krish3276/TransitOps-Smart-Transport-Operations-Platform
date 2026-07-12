@@ -13,14 +13,14 @@ const router = express.Router();
 router.use(protect);
 
 router.route('/fuel')
-  .get(getFuelLogs)
+  .get(authorize('Fleet Manager', 'Financial Analyst'), getFuelLogs)
   .post(authorize('Fleet Manager', 'Financial Analyst'), addFuelLog);
 
 router.route('/other')
-  .get(getExpenses)
+  .get(authorize('Fleet Manager', 'Financial Analyst'), getExpenses)
   .post(authorize('Fleet Manager', 'Financial Analyst'), addExpense);
 
-router.get('/vehicle-costs', getVehicleCosts);
-router.get('/by-trip', getExpensesByTrip);
+router.get('/vehicle-costs', authorize('Fleet Manager', 'Financial Analyst'), getVehicleCosts);
+router.get('/by-trip', authorize('Fleet Manager', 'Financial Analyst'), getExpensesByTrip);
 
 export default router;

@@ -1,4 +1,5 @@
 import Driver from '../models/Driver.js';
+import { checkExpiringLicenses } from '../jobs/licenseCron.js';
 
 // ─── Helper ───────────────────────────────────────────────────────────────────
 const isExpired = (date) => new Date(date) < new Date();
@@ -169,4 +170,15 @@ export const getDriverStats = async (_req, res) => {
   result.expiredLicenses = expiredCount;
 
   res.json(result);
+};
+
+// @desc    Manually trigger expiring license check and email
+// @route   POST /api/drivers/check-expiring-licenses
+// @access  Private (Fleet Manager, Safety Officer)
+export const checkExpiringLicensesManually = async (req, res) => {
+  const result = await checkExpiringLicenses();
+  if (result.error) {
+    return res.status(500).json({ error: result.error });
+  }
+  res.json({ message: `Successfully checked. Found and alerted ${result.count} expiring licenses.` });
 };

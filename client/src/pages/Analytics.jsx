@@ -1,8 +1,10 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
-import { Download, RefreshCw } from 'lucide-react';
+import { Download, RefreshCw, FileText } from 'lucide-react';
 import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import api from '../services/api.js';
 
 export default function Analytics() {
@@ -51,6 +53,46 @@ export default function Analytics() {
     window.URL.revokeObjectURL(url);
   };
 
+  const handleExportPDF = () => {
+    if (!data) return;
+
+    const doc = new jsPDF();
+    
+    // Title
+    doc.setFontSize(18);
+    doc.text('TransitOps Analytics Report', 14, 20);
+    
+    // KPI Table
+    doc.setFontSize(14);
+    doc.text('KPI Summary', 14, 30);
+    
+    autoTable(doc, {
+      startY: 35,
+      head: [['Metric', 'Value']],
+      body: [
+        ['Fuel Efficiency', `${data.kpis.fuelEfficiency} km/l`],
+        ['Fleet Utilization', `${data.kpis.fleetUtilization}%`],
+        ['Operational Cost', `${data.kpis.operationalCost}`],
+        ['Vehicle ROI', `${data.kpis.vehicleRoi}%`]
+      ],
+      theme: 'grid',
+      headStyles: { fillColor: [42, 42, 42] }
+    });
+
+    // Top Costliest Vehicles Table
+    doc.text('Top Costliest Vehicles', 14, doc.lastAutoTable.finalY + 10);
+    
+    autoTable(doc, {
+      startY: doc.lastAutoTable.finalY + 15,
+      head: [['Vehicle Name', 'Registration Number', 'Total Cost']],
+      body: data.topCostliestVehicles.map(v => [v.vehicle, v.regNumber, v.cost]),
+      theme: 'grid',
+      headStyles: { fillColor: [42, 42, 42] }
+    });
+
+    doc.save(`transitops_analytics_${new Date().toISOString().split('T')[0]}.pdf`);
+  };
+
   if (isLoading) {
     return <div className="page" style={{ padding: 24 }}>Loading analytics...</div>;
   }
@@ -65,6 +107,9 @@ export default function Analytics() {
           <input className="search-input" />
         </div>
         <div style={{ display: 'flex', gap: 12 }}>
+          <button className="btn btn-ghost" onClick={handleExportPDF}>
+            <FileText size={14} /> Export PDF
+          </button>
           <button className="btn btn-ghost" onClick={handleExportCSV}>
             <Download size={14} /> Export CSV
           </button>

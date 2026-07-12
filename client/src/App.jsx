@@ -26,6 +26,14 @@ const PrivateRoute = ({ children }) => {
   return isAuthenticated ? children : <Navigate to="/login" replace />;
 };
 
+const RoleRoute = ({ children, allowed }) => {
+  const user = useAuthStore((s) => s.user);
+  if (!user || !allowed.includes(user.role)) {
+    return <Navigate to="/" replace />;
+  }
+  return children;
+};
+
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -48,8 +56,8 @@ export default function App() {
               <Route path="trips"       element={<Trips />} />
               <Route path="maintenance" element={<Maintenance />} />
               <Route path="fuel"        element={<Fuel />} />
-              <Route path="analytics"   element={<Analytics />} />
-              <Route path="settings"    element={<Settings />} />
+              <Route path="analytics"   element={<RoleRoute allowed={['Fleet Manager', 'Financial Analyst']}><Analytics /></RoleRoute>} />
+              <Route path="settings"    element={<RoleRoute allowed={['Fleet Manager']}><Settings /></RoleRoute>} />
             </Route>
 
             <Route path="*" element={<NotFound />} />

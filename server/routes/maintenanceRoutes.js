@@ -10,7 +10,7 @@ const router = express.Router();
 router.use(protect); // all maintenance routes require auth
 
 router.route('/')
-  .get(getLogs)
+  .get(authorize('Fleet Manager', 'Financial Analyst'), getLogs)
   .post(authorize('Fleet Manager', 'Financial Analyst'), createLog);
 
 router.patch('/:id/close', authorize('Fleet Manager', 'Financial Analyst'), closeLog);

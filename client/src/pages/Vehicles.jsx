@@ -230,12 +230,6 @@ export default function Vehicles() {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <div className="topbar-right">
-          <span className="topbar-user">Raven K.</span>
-          <button className="btn btn-primary" onClick={() => setShowAdd(true)}>
-            <Plus size={16} /> + Add Vehicle
-          </button>
-        </div>
       </div>
 
       {/* ── Filters ── */}
@@ -267,6 +261,9 @@ export default function Vehicles() {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
+        <button className="btn btn-primary" style={{ marginLeft: 'auto' }} onClick={() => setShowAdd(true)}>
+          <Plus size={16} /> Add Vehicle
+        </button>
       </div>
 
       {/* ── Table ── */}

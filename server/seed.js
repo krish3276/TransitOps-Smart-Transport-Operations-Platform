@@ -6,6 +6,7 @@ import Trip from './models/Trip.js';
 import FuelLog from './models/FuelLog.js';
 import MaintenanceLog from './models/MaintenanceLog.js';
 import Expense from './models/Expense.js';
+import User from './models/User.js';
 
 dotenv.config();
 
@@ -21,8 +22,19 @@ const seedDB = async () => {
     await FuelLog.deleteMany();
     await MaintenanceLog.deleteMany();
     await Expense.deleteMany();
+    await User.deleteMany();
 
     console.log('Collections cleared');
+
+    // 0. Users
+    await User.create([
+      { name: 'Test Manager', email: 'manager@test.com', password: 'test1234', role: 'Fleet Manager' },
+      { name: 'Test Driver', email: 'driver@test.com', password: 'test1234', role: 'Driver' },
+      { name: 'Test Safety', email: 'safety@test.com', password: 'test1234', role: 'Safety Officer' },
+      { name: 'Test Finance', email: 'finance@test.com', password: 'test1234', role: 'Financial Analyst' },
+      { name: 'Admin', email: 'admin@transitops.com', password: 'admin1234', role: 'Fleet Manager' }, // Keep old admin just in case
+    ]);
+    console.log('Users seeded');
 
     // 1. Vehicles
     const vehicles = await Vehicle.insertMany([

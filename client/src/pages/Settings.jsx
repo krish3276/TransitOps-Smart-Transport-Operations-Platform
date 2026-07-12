@@ -46,7 +46,23 @@ export default function Settings() {
 
       {isManager && (
         <div style={{ background: 'var(--bg-elevated)', padding: 24, borderRadius: 8 }}>
-          <h2 style={{ fontSize: 16, marginBottom: 16 }}>User Management (Admin View)</h2>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <h2 style={{ fontSize: 16, margin: 0 }}>User Management (Admin View)</h2>
+            <button 
+              className="btn btn-primary"
+              onClick={async () => {
+                const loadingToast = toast.loading('Checking expiring licenses...');
+                try {
+                  const res = await api.post('/drivers/check-expiring-licenses');
+                  toast.success(res.data.message, { id: loadingToast });
+                } catch (err) {
+                  toast.error(err.response?.data?.error || 'Check failed', { id: loadingToast });
+                }
+              }}
+            >
+              Check Expiring Licenses
+            </button>
+          </div>
           {isLoading ? (
             <div className="table-msg">Loading users...</div>
           ) : (

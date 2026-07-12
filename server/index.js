@@ -59,9 +59,14 @@ app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', service: 'TransitOps API', timestamp: new Date() });
 });
 
+import { initCronJobs } from './jobs/licenseCron.js';
+
 // ── Error Handlers ────────────────────────────────────────────────────────────
 app.use(notFound);
 app.use(errorHandler);
+
+// Initialize scheduled background jobs
+initCronJobs();
 
 app.listen(PORT, () => {
   console.log(`🚌 TransitOps server running on http://localhost:${PORT}`);

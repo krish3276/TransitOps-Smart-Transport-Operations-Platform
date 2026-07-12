@@ -9,6 +9,10 @@ const driverSchema = new mongoose.Schema(
       required: [true, 'Driver name is required'],
       trim: true,
     },
+    email: {
+      type: String,
+      trim: true,
+    },
     licenseNumber: {
       type: String,
       required: [true, 'License number is required'],
