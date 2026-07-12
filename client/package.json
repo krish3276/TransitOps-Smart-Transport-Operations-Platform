@@ -1,0 +1,33 @@
+{
+  "name": "transitops-client",
+  "private": true,
+  "version": "1.0.0",
+  "description": "TransitOps Fleet Management — React (Vite) frontend",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "oxlint",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-router-dom": "^6.24.0",
+    "axios": "^1.7.2",
+    "@tanstack/react-query": "^5.51.1",
+    "zustand": "^4.5.4",
+    "recharts": "^2.12.7",
+    "react-hot-toast": "^2.4.1",
+    "lucide-react": "^0.400.0",
+    "date-fns": "^3.6.0",
+    "clsx": "^2.1.1"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.3",
+    "oxlint": "^1.71.0",
+    "vite": "^8.1.1"
+  }
+}
