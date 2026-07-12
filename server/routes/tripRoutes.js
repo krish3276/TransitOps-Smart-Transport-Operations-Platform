@@ -1,54 +1,31 @@
 import express from 'express';
+import {
+  getTrips,
+  getTrip,
+  createTrip,
+  dispatchTrip,
+  completeTrip,
+  cancelTrip,
+  deleteTrip,
+  getTripStats,
+} from '../controllers/tripController.js';
 import { protect, authorize } from '../middleware/authMiddleware.js';
-import Trip from '../models/Trip.js';
-import { generateTripId } from '../utils/helpers.js';
 
 const router = express.Router();
-router.use(protect);
+router.use(protect); // all trip routes require auth
 
-router.get('/', async (req, res) => {
-  const { status, vehicle, driver, page = 1, limit = 20 } = req.query;
-  const filter = {};
-  if (status) filter.status = status;
-  if (vehicle) filter.vehicle = vehicle;
-  if (driver) filter.driver = driver;
-  const total = await Trip.countDocuments(filter);
-  const trips = await Trip.find(filter)
-    .populate('route', 'routeNumber name')
-    .populate('vehicle', 'registrationNumber type')
-    .populate('driver', 'employeeId user')
-    .sort({ scheduledDeparture: -1 })
-    .skip((page - 1) * limit)
-    .limit(Number(limit));
-  res.json({ trips, total, page: Number(page), pages: Math.ceil(total / limit) });
-});
+router.get('/stats', getTripStats);
 
-router.get('/:id', async (req, res) => {
-  const trip = await Trip.findById(req.params.id)
-    .populate('route')
-    .populate('vehicle')
-    .populate('driver');
-  if (!trip) return res.status(404).json({ error: 'Trip not found' });
-  res.json(trip);
-});
+router.route('/')
+  .get(getTrips)
+  .post(authorize('admin', 'dispatcher', 'fleet_manager'), createTrip);
 
-router.post('/', authorize('admin', 'dispatcher'), async (req, res) => {
-  const trip = await Trip.create({ ...req.body, tripId: generateTripId() });
-  res.status(201).json(trip);
-});
+router.route('/:id')
+  .get(getTrip)
+  .delete(authorize('admin', 'dispatcher'), deleteTrip);
 
-router.put('/:id', authorize('admin', 'dispatcher'), async (req, res) => {
-  const trip = await Trip.findByIdAndUpdate(req.params.id, req.body, {
-    new: true, runValidators: true,
-  });
-  if (!trip) return res.status(404).json({ error: 'Trip not found' });
-  res.json(trip);
-});
-
-router.delete('/:id', authorize('admin'), async (req, res) => {
-  const trip = await Trip.findByIdAndDelete(req.params.id);
-  if (!trip) return res.status(404).json({ error: 'Trip not found' });
-  res.json({ message: 'Trip removed' });
-});
+router.patch('/:id/dispatch', authorize('admin', 'dispatcher'), dispatchTrip);
+router.patch('/:id/complete', authorize('admin', 'dispatcher'), completeTrip);
+router.patch('/:id/cancel', authorize('admin', 'dispatcher'), cancelTrip);
 
 export default router;
