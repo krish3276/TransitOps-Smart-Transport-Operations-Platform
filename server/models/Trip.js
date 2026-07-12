@@ -17,6 +17,7 @@ const tripSchema = new mongoose.Schema(
     finalOdometer: { type: Number },
     fuelConsumed: { type: Number },
     fuelCost: { type: Number },
+    tripRevenue: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

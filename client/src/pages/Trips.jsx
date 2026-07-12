@@ -36,6 +36,7 @@ export default function Trips() {
     finalOdometer: '',
     fuelConsumed: '',
     fuelCost: '',
+    tripRevenue: '',
   });
 
   // Fetch all trips
@@ -87,7 +88,7 @@ export default function Trips() {
       cargoWeight: trip.cargoWeight,
       plannedDistance: trip.plannedDistance,
     });
-    setCompleteForm({ finalOdometer: '', fuelConsumed: '', fuelCost: '' });
+    setCompleteForm({ finalOdometer: '', fuelConsumed: '', fuelCost: '', tripRevenue: '' });
   };
 
   const resetForm = () => {
@@ -168,7 +169,7 @@ export default function Trips() {
       await api.patch(`/trips/${selectedTrip._id}/complete`, completeForm);
       toast.success('Trip completed');
       refresh();
-      handleSelectTrip({ ...selectedTrip, status: 'Completed', finalOdometer: completeForm.finalOdometer, fuelConsumed: completeForm.fuelConsumed, fuelCost: completeForm.fuelCost });
+      handleSelectTrip({ ...selectedTrip, status: 'Completed', finalOdometer: completeForm.finalOdometer, fuelConsumed: completeForm.fuelConsumed, fuelCost: completeForm.fuelCost, tripRevenue: completeForm.tripRevenue });
     } catch (err) {
       toast.error(err.response?.data?.error || 'Completion failed');
     }
@@ -296,6 +297,10 @@ export default function Trips() {
                   <div className="form-group">
                     <label>FUEL COST (₹)</label>
                     <input type="number" value={completeForm.fuelCost} onChange={(e) => setCompleteForm(f => ({ ...f, fuelCost: e.target.value }))} placeholder="e.g. 4500" />
+                  </div>
+                  <div className="form-group">
+                    <label>REVENUE (₹)</label>
+                    <input type="number" value={completeForm.tripRevenue} onChange={(e) => setCompleteForm(f => ({ ...f, tripRevenue: e.target.value }))} placeholder="e.g. 15000" />
                   </div>
                 </div>
               </div>

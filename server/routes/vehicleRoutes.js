@@ -16,11 +16,11 @@ router.use(protect); // all vehicle routes require auth
 router.get('/stats', getVehicleStats);
 router.route('/')
   .get(getVehicles)
-  .post(authorize('admin', 'dispatcher'), createVehicle);
+  .post(authorize('Fleet Manager', 'Safety Officer'), createVehicle);
 
 router.route('/:id')
   .get(getVehicle)
-  .put(authorize('admin', 'dispatcher'), updateVehicle)
-  .delete(authorize('admin'), deleteVehicle);
+  .put(authorize('Fleet Manager', 'Safety Officer'), updateVehicle)
+  .delete(authorize('Fleet Manager'), deleteVehicle);
 
 export default router;

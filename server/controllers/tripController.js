@@ -137,7 +137,7 @@ export const dispatchTrip = async (req, res) => {
 // @desc    Complete a trip (Dispatched -> Completed)
 // @route   PATCH /api/trips/:id/complete
 export const completeTrip = async (req, res) => {
-  const { finalOdometer, fuelConsumed, fuelCost } = req.body;
+  const { finalOdometer, fuelConsumed, fuelCost, tripRevenue } = req.body;
 
   if (finalOdometer == null || fuelConsumed == null || fuelCost == null) {
     return res.status(400).json({ error: 'finalOdometer, fuelConsumed, and fuelCost are required' });
@@ -170,6 +170,9 @@ export const completeTrip = async (req, res) => {
     trip.finalOdometer = Number(finalOdometer);
     trip.fuelConsumed = Number(fuelConsumed);
     trip.fuelCost = Number(fuelCost);
+    if (tripRevenue != null) {
+      trip.tripRevenue = Number(tripRevenue);
+    }
 
     // Auto-create FuelLog
     await FuelLog.create([{

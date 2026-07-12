@@ -14,11 +14,11 @@ router.use(protect);
 
 router.route('/fuel')
   .get(getFuelLogs)
-  .post(authorize('admin', 'fleet_manager', 'dispatcher'), addFuelLog);
+  .post(authorize('Fleet Manager', 'Financial Analyst'), addFuelLog);
 
 router.route('/other')
   .get(getExpenses)
-  .post(authorize('admin', 'fleet_manager', 'dispatcher'), addExpense);
+  .post(authorize('Fleet Manager', 'Financial Analyst'), addExpense);
 
 router.get('/vehicle-costs', getVehicleCosts);
 router.get('/by-trip', getExpensesByTrip);

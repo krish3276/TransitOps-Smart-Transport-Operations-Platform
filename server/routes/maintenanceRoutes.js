@@ -11,8 +11,8 @@ router.use(protect); // all maintenance routes require auth
 
 router.route('/')
   .get(getLogs)
-  .post(authorize('admin', 'fleet_manager'), createLog);
+  .post(authorize('Fleet Manager', 'Financial Analyst'), createLog);
 
-router.patch('/:id/close', authorize('admin', 'fleet_manager'), closeLog);
+router.patch('/:id/close', authorize('Fleet Manager', 'Financial Analyst'), closeLog);
 
 export default router;

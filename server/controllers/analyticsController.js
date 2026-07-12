@@ -83,27 +83,43 @@ export const getAnalyticsData = async (req, res) => {
       item.percent = Math.round((item.cost / maxCost) * 100);
     });
 
+    // 5. Monthly Revenue (Real data from Completed Trips)
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const revenueByMonth = {};
+    let totalTripRevenue = 0;
+
+    completedTrips.forEach(t => {
+      const revenue = t.tripRevenue || 0;
+      totalTripRevenue += revenue;
+      
+      const date = new Date(t.updatedAt || t.createdAt);
+      const monthKey = `${date.getFullYear()}-${date.getMonth()}`;
+      
+      if (!revenueByMonth[monthKey]) {
+        revenueByMonth[monthKey] = {
+          name: monthNames[date.getMonth()],
+          revenue: 0,
+          dateObj: date
+        };
+      }
+      revenueByMonth[monthKey].revenue += revenue;
+    });
+
+    // Add aggregated trip revenue to global revenue for ROI calculation
+    globalRevenue += totalTripRevenue;
+
+    // Recalculate ROI now that we have globalRevenue completely tallied
     let vehicleRoi = 0;
     if (globalAcq > 0) {
       vehicleRoi = (((globalRevenue - (globalMaint + globalFuel)) / globalAcq) * 100).toFixed(1);
     }
 
-    // 5. Monthly Revenue (Mocked for chart)
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const currentMonthIndex = new Date().getMonth();
-    const monthlyRevenue = [];
-    
-    // Generate last 6 months of data
-    for (let i = 5; i >= 0; i--) {
-      let idx = currentMonthIndex - i;
-      if (idx < 0) idx += 12;
-      monthlyRevenue.push({
-        name: months[idx],
-        revenue: Math.floor(Math.random() * 50000) + 20000 // Random between 20k and 70k
-      });
-    }
-    // Make the last month (current month) match a portion of globalRevenue roughly if needed
-    // But since it's just a chart demo, this is fine.
+    const monthlyRevenue = Object.values(revenueByMonth)
+      .sort((a, b) => a.dateObj - b.dateObj)
+      .map(item => ({
+        name: item.name,
+        revenue: item.revenue
+      }));
 
     res.json({
       kpis: {

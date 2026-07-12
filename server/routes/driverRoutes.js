@@ -18,14 +18,14 @@ router.get('/stats', getDriverStats);
 
 router.route('/')
   .get(getDrivers)
-  .post(authorize('admin', 'fleet_manager'), createDriver);
+  .post(authorize('Fleet Manager', 'Safety Officer'), createDriver);
 
 router.route('/:id')
   .get(getDriver)
-  .put(authorize('admin', 'fleet_manager'), updateDriver)
-  .delete(authorize('admin'), deleteDriver);
+  .put(authorize('Fleet Manager', 'Safety Officer'), updateDriver)
+  .delete(authorize('Fleet Manager'), deleteDriver);
 
 // Quick status toggle (safety officer can also do this)
-router.patch('/:id/status', authorize('admin', 'fleet_manager', 'safety_officer'), toggleStatus);
+router.patch('/:id/status', authorize('Fleet Manager', 'Safety Officer'), toggleStatus);
 
 export default router;
