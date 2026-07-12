@@ -35,6 +35,7 @@ export default function Trips() {
   const [completeForm, setCompleteForm] = useState({
     finalOdometer: '',
     fuelConsumed: '',
+    fuelCost: '',
   });
 
   // Fetch all trips
@@ -86,7 +87,7 @@ export default function Trips() {
       cargoWeight: trip.cargoWeight,
       plannedDistance: trip.plannedDistance,
     });
-    setCompleteForm({ finalOdometer: '', fuelConsumed: '' });
+    setCompleteForm({ finalOdometer: '', fuelConsumed: '', fuelCost: '' });
   };
 
   const resetForm = () => {
@@ -159,15 +160,15 @@ export default function Trips() {
   };
 
   const handleComplete = async () => {
-    if (!completeForm.finalOdometer || !completeForm.fuelConsumed) {
-      toast.error('Odometer and fuel details are required');
+    if (!completeForm.finalOdometer || !completeForm.fuelConsumed || !completeForm.fuelCost) {
+      toast.error('Odometer, fuel consumed, and fuel cost are required');
       return;
     }
     try {
       await api.patch(`/trips/${selectedTrip._id}/complete`, completeForm);
       toast.success('Trip completed');
       refresh();
-      handleSelectTrip({ ...selectedTrip, status: 'Completed', finalOdometer: completeForm.finalOdometer, fuelConsumed: completeForm.fuelConsumed });
+      handleSelectTrip({ ...selectedTrip, status: 'Completed', finalOdometer: completeForm.finalOdometer, fuelConsumed: completeForm.fuelConsumed, fuelCost: completeForm.fuelCost });
     } catch (err) {
       toast.error(err.response?.data?.error || 'Completion failed');
     }
@@ -291,6 +292,10 @@ export default function Trips() {
                   <div className="form-group">
                     <label>FUEL CONSUMED (L)</label>
                     <input type="number" value={completeForm.fuelConsumed} onChange={(e) => setCompleteForm(f => ({ ...f, fuelConsumed: e.target.value }))} placeholder="e.g. 45" />
+                  </div>
+                  <div className="form-group">
+                    <label>FUEL COST (₹)</label>
+                    <input type="number" value={completeForm.fuelCost} onChange={(e) => setCompleteForm(f => ({ ...f, fuelCost: e.target.value }))} placeholder="e.g. 4500" />
                   </div>
                 </div>
               </div>

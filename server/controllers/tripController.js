@@ -137,10 +137,10 @@ export const dispatchTrip = async (req, res) => {
 // @desc    Complete a trip (Dispatched -> Completed)
 // @route   PATCH /api/trips/:id/complete
 export const completeTrip = async (req, res) => {
-  const { finalOdometer, fuelConsumed } = req.body;
+  const { finalOdometer, fuelConsumed, fuelCost } = req.body;
 
-  if (finalOdometer == null || fuelConsumed == null) {
-    return res.status(400).json({ error: 'finalOdometer and fuelConsumed are required' });
+  if (finalOdometer == null || fuelConsumed == null || fuelCost == null) {
+    return res.status(400).json({ error: 'finalOdometer, fuelConsumed, and fuelCost are required' });
   }
 
   const trip = await Trip.findById(req.params.id);
@@ -169,12 +169,14 @@ export const completeTrip = async (req, res) => {
     trip.status = 'Completed';
     trip.finalOdometer = Number(finalOdometer);
     trip.fuelConsumed = Number(fuelConsumed);
+    trip.fuelCost = Number(fuelCost);
 
     // Auto-create FuelLog
     await FuelLog.create([{
       vehicle: vehicle._id,
       trip: trip._id,
       liters: Number(fuelConsumed),
+      cost: Number(fuelCost),
       notes: `Auto-generated from Trip ${trip.tripId} completion`,
     }], { session });
 
