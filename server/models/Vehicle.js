@@ -36,6 +36,10 @@ const vehicleSchema = new mongoose.Schema(
       default: 0,
       min: 0,
     },
+    revenue: {
+      type: Number,
+      default: 0,
+    },
     // Spec status values: Available, On Trip, In Shop, Retired
     status: {
       type: String,
