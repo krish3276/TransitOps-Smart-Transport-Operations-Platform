@@ -2,43 +2,76 @@ import mongoose from 'mongoose';
 
 const driverSchema = new mongoose.Schema(
   {
-    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    employeeId: { type: String, required: true, trim: true },
-    licenseNumber: { type: String, required: true, unique: true, trim: true },
-    licenseExpiry: { type: Date, required: true },
-    licenseClass: {
+    // Spec fields: Name, License Number, License Category, License Expiry Date,
+    //              Contact Number, Safety Score, Status
+    name: {
       type: String,
-      enum: ['A', 'B', 'C', 'D', 'E'],
-      required: true,
+      required: [true, 'Driver name is required'],
+      trim: true,
     },
-    phone: { type: String, required: true, trim: true },
-    address: {
-      street: String,
-      city: String,
-      state: String,
-      pincode: String,
+    licenseNumber: {
+      type: String,
+      required: [true, 'License number is required'],
+      trim: true,
+      uppercase: true,
     },
-    dateOfBirth: { type: Date },
-    joiningDate: { type: Date, default: Date.now },
+    // License Category — from mockup: LMV, HMV (Light/Heavy Motor Vehicle)
+    licenseCategory: {
+      type: String,
+      enum: ['LMV', 'HMV', 'HPMV', 'MGV', 'TRANS'],
+      required: [true, 'License category is required'],
+    },
+    licenseExpiry: {
+      type: Date,
+      required: [true, 'License expiry date is required'],
+    },
+    contact: {
+      type: String,
+      required: [true, 'Contact number is required'],
+      trim: true,
+    },
+    // Safety score 0–100 (% in mockup)
+    safetyScore: {
+      type: Number,
+      default: 100,
+      min: 0,
+      max: 100,
+    },
+    // Trip completion count — shown as "Trip Compl." in mockup
+    tripsCompleted: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    // Spec status values: Available, On Trip, Off Duty, Suspended
     status: {
       type: String,
-      enum: ['available', 'on_duty', 'off_duty', 'on_leave', 'suspended'],
-      default: 'available',
-    },
-    assignedVehicle: { type: mongoose.Schema.Types.ObjectId, ref: 'Vehicle', default: null },
-    totalTrips: { type: Number, default: 0 },
-    rating: { type: Number, default: 5.0, min: 1, max: 5 },
-    emergencyContact: {
-      name: String,
-      relation: String,
-      phone: String,
+      enum: ['Available', 'On Trip', 'Off Duty', 'Suspended'],
+      default: 'Available',
     },
   },
   { timestamps: true }
 );
 
+// Unique index on licenseNumber (business rule)
+driverSchema.index({ licenseNumber: 1 }, { unique: true });
 driverSchema.index({ status: 1 });
-driverSchema.index({ employeeId: 1 });
+
+// Virtual: is the license currently expired?
+driverSchema.virtual('isLicenseExpired').get(function () {
+  return this.licenseExpiry < new Date();
+});
+
+// Virtual: is this driver assignable to a trip?
+driverSchema.virtual('isAssignable').get(function () {
+  return (
+    this.status === 'Available' &&
+    this.licenseExpiry >= new Date()
+  );
+});
+
+driverSchema.set('toJSON', { virtuals: true });
+driverSchema.set('toObject', { virtuals: true });
 
 const Driver = mongoose.model('Driver', driverSchema);
 export default Driver;

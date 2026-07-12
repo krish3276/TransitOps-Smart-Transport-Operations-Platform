@@ -1,53 +1,31 @@
 import express from 'express';
+import {
+  getDrivers,
+  getDriver,
+  createDriver,
+  updateDriver,
+  deleteDriver,
+  toggleStatus,
+  getDriverStats,
+} from '../controllers/driverController.js';
 import { protect, authorize } from '../middleware/authMiddleware.js';
-import Driver from '../models/Driver.js';
 
 const router = express.Router();
-router.use(protect);
+router.use(protect); // all driver routes require auth
 
-// GET /api/drivers
-router.get('/', async (req, res) => {
-  const { status, page = 1, limit = 20 } = req.query;
-  const filter = status ? { status } : {};
-  const total = await Driver.countDocuments(filter);
-  const drivers = await Driver.find(filter)
-    .populate('user', 'name email avatar')
-    .populate('assignedVehicle', 'registrationNumber type')
-    .sort({ createdAt: -1 })
-    .skip((page - 1) * limit)
-    .limit(Number(limit));
-  res.json({ drivers, total, page: Number(page), pages: Math.ceil(total / limit) });
-});
+// Stats — must be before /:id to avoid "stats" being treated as an id
+router.get('/stats', getDriverStats);
 
-// GET /api/drivers/:id
-router.get('/:id', async (req, res) => {
-  const driver = await Driver.findById(req.params.id)
-    .populate('user', 'name email avatar')
-    .populate('assignedVehicle');
-  if (!driver) return res.status(404).json({ error: 'Driver not found' });
-  res.json(driver);
-});
+router.route('/')
+  .get(getDrivers)
+  .post(authorize('admin', 'fleet_manager'), createDriver);
 
-// POST /api/drivers
-router.post('/', authorize('admin', 'dispatcher'), async (req, res) => {
-  const driver = await Driver.create(req.body);
-  res.status(201).json(driver);
-});
+router.route('/:id')
+  .get(getDriver)
+  .put(authorize('admin', 'fleet_manager'), updateDriver)
+  .delete(authorize('admin'), deleteDriver);
 
-// PUT /api/drivers/:id
-router.put('/:id', authorize('admin', 'dispatcher'), async (req, res) => {
-  const driver = await Driver.findByIdAndUpdate(req.params.id, req.body, {
-    new: true, runValidators: true,
-  });
-  if (!driver) return res.status(404).json({ error: 'Driver not found' });
-  res.json(driver);
-});
-
-// DELETE /api/drivers/:id
-router.delete('/:id', authorize('admin'), async (req, res) => {
-  const driver = await Driver.findByIdAndDelete(req.params.id);
-  if (!driver) return res.status(404).json({ error: 'Driver not found' });
-  res.json({ message: 'Driver removed' });
-});
+// Quick status toggle (safety officer can also do this)
+router.patch('/:id/status', authorize('admin', 'fleet_manager', 'safety_officer'), toggleStatus);
 
 export default router;
